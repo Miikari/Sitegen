@@ -28,7 +28,7 @@ def print_files(src, dst):
 
     return
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     f = open(from_path)
     contents = f.read()
@@ -41,23 +41,29 @@ def generate_page(from_path, template_path, dest_path):
     title_to_be = extract_title(contents)
     updated_template = template_contents.replace("{{ Title }}", title_to_be)
     updated_template = updated_template.replace("{{ Content }}", html_string)
+    updated_template = updated_template.replace('href="/', f'href="{basepath}')
+    updated_template = updated_template.replace('src="/', f'src="{basepath}')
 
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     d = open(dest_path, "w")
     d.write(updated_template)
     d.close()
 
-def generate_recursive(from_dir_path, template_path, dest_dir):
+def generate_recursive(from_dir_path, template_path, dest_dir, basepath):
     files = os.listdir(from_dir_path)
     print(files)
     for file in files:
+        from_path = os.path.join(from_dir_path, file)
+        dest_path = os.path.join(dest_dir, file)
+
         print(file)
         if not os.path.isfile(f"{from_dir_path}/{file}"):
-            generate_recursive(os.path.join(from_dir_path, file), template_path, os.path.join(dest_dir, file),)
+            generate_recursive(from_path, template_path, dest_path, basepath)
         elif file.endswith(".md"):
-            generate_page(os.path.join(from_dir_path, file),template_path,os.path.join(dest_dir, Path(file).with_suffix(".html")))
+            dest_html = os.path.join(dest_dir, Path(file).with_suffix(".html"))
+            generate_page(from_path, template_path, dest_html, basepath)
             print(f"copying: {file}")
         else:
-            shutil.copy(os.path.join(from_dir_path, file), dest_dir)
+            shutil.copy(from_path, dest_path)
             print(f"copying: {file}")
 
