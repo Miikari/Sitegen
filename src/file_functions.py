@@ -58,6 +58,7 @@ def generate_recursive(from_dir_path, template_path, dest_dir, basepath):
 
         print(file)
         if not os.path.isfile(f"{from_dir_path}/{file}"):
+            os.makedirs(dest_path, exist_ok=True)
             generate_recursive(from_path, template_path, dest_path, basepath)
         elif file.endswith(".md"):
             dest_html = os.path.join(dest_dir, Path(file).with_suffix(".html"))
@@ -65,5 +66,5 @@ def generate_recursive(from_dir_path, template_path, dest_dir, basepath):
             print(f"copying: {file}")
         else:
             shutil.copy(from_path, dest_path)
-            print(f"copying: {file}")
+            print(f"SHUTIL copying: {file}")
 
